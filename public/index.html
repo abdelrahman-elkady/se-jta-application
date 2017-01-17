@@ -19,7 +19,7 @@
                     </p>
                     <ol class="main-list">
                         <li>
-                            Submit a POST Request to /api/apply with the following data in the body as a JSON Payload:
+                            Submit a POST Request to <strong>/api/apply</strong> with the following data in the body as a JSON Payload:
 
                             <ul class="list">
                                 <li>firstName: String</li>
@@ -36,13 +36,13 @@
 
                         <li>Attach the JWT in
                             <strong>Autherization</strong>
-                            header and send a PUT Request to /api/applications/confirm with the following data in the body as a JSON Payload:
+                            header and send a PUT Request to <strong>/api/applications/confirm</strong> with the following data in the body as a JSON Payload:
 
                             <ul class="list">
                                 <li>references: [{title: String, url: String}] <br><br>This is an array of objects that refers to your work, you can leave the url blank if it is not required. For example you can include here specific projects, your github profile, or your experience as
                                     a JTA in previous years</li>
 
-                                <li>position: ENUM <br><br>This should be <strong>0</strong> if you are applying for a mentor position (Main JTA with contract) or <strong>1</strong> If you are applying as a volunteer</li>
+                                <li>position: Number <br><br>This should be <strong>0</strong> if you are applying for a mentor position (Main JTA with contract) or <strong>1</strong> If you are applying as a volunteer</li>
                             </ul>
                         </li>
 
