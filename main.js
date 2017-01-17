@@ -1,11 +1,14 @@
 var express = require('express');
 var app = express();
 var database = require('./database');
-const bodyParser = require('body-parser');
+var bodyParser = require('body-parser');
 
 var Joi = require('joi');
 var methodOverride = require('method-override');
 var _ = require('lodash');
+var jwt = require('jsonwebtoken');
+
+var config = require('./config');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
@@ -28,19 +31,45 @@ database.connect(function(db, Applications) {
 
   app.post('/api/apply', function(req, res) {
     Joi.validate(req.body, applySchema, function(err, value) {
-      if(err) {
+      if (err) {
         var message = '';
 
         for (var errorDetail of err.details) {
-          message += errorDetail.message + ' ';
+          message += errorDetail.message + '\n';
         }
 
         return res.send(message);
       } else {
-        return res.json({'msg': 'great job, here is a cookie for you'});
+        Applications.findOne({
+          'email': req.body.email
+        }, function(err, user) {
+          if (err) {
+            return res.json({msg: 'Something went wrong'});
+          } else if (user) {
+            return res.json({msg: 'We have received your submission already, thank you'});
+          } else {
+            var body = req.body;
+            var application = {
+              firstName: body.firstName,
+              lastName: body.lastName,
+              email: body.email,
+              mobile: body.mobile,
+              personalWebsite: body.personalWebsite
+            };
+
+            Applications.insertOne(application, function(err, doc) {
+              if(err) {
+                return res.json({msg: 'Something went wrong'});
+              } else {
+                var token = jwt.sign({_id: doc.ops[0]._id}, config.secret, {expiresIn: '10 days'});
+                return res.status(201).json({msg: 'Data submitted successfully !', token: token});
+              }
+            })
+          }
+        });
+
       }
     });
-
 
   });
 
