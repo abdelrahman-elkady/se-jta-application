@@ -7,6 +7,7 @@ var Joi = require('joi');
 var methodOverride = require('method-override');
 var _ = require('lodash');
 var jwt = require('jsonwebtoken');
+var moment = require('moment');
 
 var config = require('./config');
 var ObjectID = require('mongodb').ObjectID;
@@ -26,6 +27,7 @@ var applySchema = {
 
 var confirmSchema = {
   references: Joi.array().items(Joi.object({title: Joi.string().required(), url: Joi.string().min(5)})).required(),
+  gucId: Joi.string().min(2).required(),
   position: Joi.number().min(0).max(1)
 };
 
@@ -60,7 +62,8 @@ database.connect(function(db, Applications) {
               lastName: body.lastName,
               email: body.email,
               mobile: body.mobile,
-              personalWebsite: body.personalWebsite
+              personalWebsite: body.personalWebsite,
+              createdAt: moment().utc().unix()
             };
 
             Applications.insertOne(application, function(err, doc) {
@@ -104,6 +107,7 @@ database.connect(function(db, Applications) {
 
         return res.json({msg: message});
       } else {
+        var gucId = req.body.gucId;
         var references = req.body.references;
         var position = req.body.position;
 
@@ -111,8 +115,10 @@ database.connect(function(db, Applications) {
           _id: ObjectID(applicationId)
         }, {
           $set: {
+            gucId: gucId,
             position: position,
-            references: references
+            references: references,
+            updatedAt: moment().utc().unix()
           }
         }, function(err, affectedDocs) {
           if(affectedDocs.result.nModified === 0) {
